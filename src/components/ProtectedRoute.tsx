@@ -8,13 +8,13 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   const userRole = localStorage.getItem("role");
 
+  // If not logged in → go to login
   if (!userRole) {
-    // not logged in → send to login
     return <Navigate to={`/${role}/login`} replace />;
   }
 
+  // If wrong role → force them to their own dashboard
   if (userRole !== role) {
-    // wrong role → send to correct dashboard
     return <Navigate to={`/${userRole}/dashboard`} replace />;
   }
 
