@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CustomerFormProps {
   onClose: () => void;
@@ -18,18 +19,79 @@ const CustomerForm = ({ onClose }: CustomerFormProps) => {
     panNumber: "",
     aadhaarNumber: "",
     mobileNumber: "",
+    debitCardNumber: "",
     date: new Date().toISOString().split('T')[0]
   });
+  const [files, setFiles] = useState({
+    panPhoto: null as File | null,
+    aadhaarPhoto: null as File | null,
+    debitCardPhoto: null as File | null
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileUpload = async (file: File, type: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${type}_${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('customer-documents')
+        .upload(fileName, file);
+
+      if (error) throw error;
+      return data.path;
+    } catch (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Customer Record Saved",
-      description: "The customer record has been added successfully.",
-    });
-    onClose();
+    setIsLoading(true);
+
+    try {
+      // Upload files first
+      const panPhotoUrl = files.panPhoto ? await handleFileUpload(files.panPhoto, 'pan') : null;
+      const aadhaarPhotoUrl = files.aadhaarPhoto ? await handleFileUpload(files.aadhaarPhoto, 'aadhaar') : null;
+      const debitCardPhotoUrl = files.debitCardPhoto ? await handleFileUpload(files.debitCardPhoto, 'debit') : null;
+
+      // Save customer data
+      const { error } = await supabase
+        .from('customers')
+        .insert({
+          name: formData.name,
+          account_number: formData.accountNumber,
+          ifsc_code: formData.ifscCode,
+          pan_number: formData.panNumber,
+          aadhaar_number: formData.aadhaarNumber,
+          mobile: formData.mobileNumber,
+          debit_card_number: formData.debitCardNumber,
+          date_registered: formData.date,
+          pan_photo_url: panPhotoUrl,
+          aadhaar_photo_url: aadhaarPhotoUrl,
+          debit_card_photo_url: debitCardPhotoUrl
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Customer Record Saved",
+        description: "The customer record has been added successfully.",
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error saving customer:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save customer record. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -121,32 +183,74 @@ const CustomerForm = ({ onClose }: CustomerFormProps) => {
                 className="bg-card border-input"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="debitCardNumber">Debit Card Number</Label>
+              <Input
+                id="debitCardNumber"
+                value={formData.debitCardNumber}
+                onChange={(e) => handleInputChange("debitCardNumber", e.target.value)}
+                placeholder="Enter debit card number"
+                className="bg-card border-input"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="date">Registration Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => handleInputChange("date", e.target.value)}
+                required
+                className="bg-card border-input"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
             <Label>Document Uploads</Label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {["PAN Card", "Aadhaar Card", "Debit Card"].map((docType) => (
-                <div key={docType} className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">{docType}</Label>
-                  <div className="border-2 border-dashed border-input rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer">
+              {[
+                { key: "panPhoto", label: "PAN Card" },
+                { key: "aadhaarPhoto", label: "Aadhaar Card" },
+                { key: "debitCardPhoto", label: "Debit Card" }
+              ].map((doc) => (
+                <div key={doc.key} className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">{doc.label}</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setFiles(prev => ({ ...prev, [doc.key]: file }));
+                      }
+                    }}
+                    className="hidden"
+                    id={`file-${doc.key}`}
+                  />
+                  <label 
+                    htmlFor={`file-${doc.key}`}
+                    className="border-2 border-dashed border-input rounded-lg p-4 text-center hover:border-primary transition-colors cursor-pointer block"
+                  >
                     <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      Click to upload {docType}
+                      {files[doc.key as keyof typeof files]?.name || `Click to upload ${doc.label}`}
                     </p>
-                  </div>
+                  </label>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-gradient-primary">
+            <Button type="submit" className="bg-gradient-primary" disabled={isLoading}>
               <Save className="h-4 w-4 mr-2" />
-              Save Customer
+              {isLoading ? "Saving..." : "Save Customer"}
             </Button>
           </div>
         </form>
