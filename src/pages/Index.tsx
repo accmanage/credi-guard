@@ -24,7 +24,7 @@ const Index = () => {
   const getUserRole = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.location.href = "/Login"; // redirect if not logged in
+      window.location.href = "/login"; // redirect if not logged in
       return;
     }
     const { data } = await supabase
