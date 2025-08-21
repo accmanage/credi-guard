@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Users, FileText, Shield, Plus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import CustomerForm from "@/components/CustomerForm";
 import RecordsTable from "@/components/RecordsTable";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [stats, setStats] = useState({
     totalCustomers: 0,
@@ -17,24 +19,30 @@ const Index = () => {
   });
 
   useEffect(() => {
+    // Auto-redirect based on login role
+    const role = localStorage.getItem("role");
+    if (role === "admin") {
+      navigate("/admin/dashboard");
+    } else if (role === "staff") {
+      navigate("/staff/dashboard");
+    }
+
+    // Only fetch stats if not redirecting
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
     try {
-      // Get total customers
       const { count: totalCustomers } = await supabase
         .from('customers')
         .select('*', { count: 'exact', head: true });
 
-      // Get customers added this month
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
       const { count: thisMonth } = await supabase
         .from('customers')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', firstDayOfMonth.toISOString());
 
-      // Calculate documents (each customer can have up to 3 docs)
       const { data: customersWithDocs } = await supabase
         .from('customers')
         .select('pan_photo_url, aadhaar_photo_url, debit_card_photo_url');
@@ -49,7 +57,7 @@ const Index = () => {
       setStats({
         totalCustomers: totalCustomers || 0,
         totalDocuments,
-        verifiedRecords: totalCustomers || 0, // All records are considered verified
+        verifiedRecords: totalCustomers || 0,
         thisMonth: thisMonth || 0
       });
     } catch (error) {
@@ -60,18 +68,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <AdminHeader />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {showForm ? (
           <div className="max-w-4xl mx-auto">
             <CustomerForm onClose={() => {
               setShowForm(false);
-              fetchStats(); // Refresh stats when form is closed
+              fetchStats();
             }} />
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatsCard
                 title="Total Customers"
@@ -103,7 +110,6 @@ const Index = () => {
               />
             </div>
 
-            {/* Action Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
               <div>
                 <h2 className="text-2xl font-bold text-foreground">Customer Management</h2>
@@ -119,7 +125,6 @@ const Index = () => {
               </Button>
             </div>
 
-            {/* Records Table */}
             <RecordsTable />
           </div>
         )}
