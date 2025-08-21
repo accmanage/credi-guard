@@ -8,7 +8,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +32,9 @@ const Login = () => {
       .single();
 
     if (profile?.role === "admin") {
-      router.push("/"); // Admin dashboard
+      navigate("/"); // Admin dashboard
     } else {
-      router.push("/staff"); // Staff dashboard
+      navigate("/staff"); // Staff dashboard
     }
   };
 
