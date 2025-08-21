@@ -1,45 +1,53 @@
-import { useState, useEffect } from "react";
-import { Users, FileText, Shield, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/AdminHeader";
 import StatsCard from "@/components/StatsCard";
-import RecordsTable from "@/components/RecordsTable";
 
-export default function AdminDashboard() {
-  const [records, setRecords] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    totalDocuments: 0,
+  });
 
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role !== "admin") {
-      window.location.href = "/admin/login";
-    }
-
-    const fetchRecords = async () => {
-      const { data, error } = await supabase
-        .from("staff_data")
-        .select("*, users(email, role)");
-      if (!error) setRecords(data || []);
-      setLoading(false);
-    };
-
-    fetchRecords();
+    fetchStats();
   }, []);
 
+  const fetchStats = async () => {
+    try {
+      const { count: totalCustomers } = await supabase
+        .from("customers")
+        .select("*", { count: "exact", head: true });
+
+      const { data: customersWithDocs } = await supabase
+        .from("customers")
+        .select("pan_photo_url, aadhaar_photo_url, debit_card_photo_url");
+
+      const totalDocuments = customersWithDocs?.reduce((sum, c) => {
+        return sum +
+          (c.pan_photo_url ? 1 : 0) +
+          (c.aadhaar_photo_url ? 1 : 0) +
+          (c.debit_card_photo_url ? 1 : 0);
+      }, 0) || 0;
+
+      setStats({ totalCustomers, totalDocuments });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminHeader title="Admin Dashboard" />
-
-      <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={<Users />} title="Total Staff" value={records.length} />
-        <StatsCard icon={<FileText />} title="Total Records" value={records.length} />
-        <StatsCard icon={<Shield />} title="Admins" value="1" />
-        <StatsCard icon={<TrendingUp />} title="Growth" value="+12%" />
-      </div>
-
-      <div className="p-6">
-        <RecordsTable records={records} loading={loading} />
-      </div>
+    <div className="min-h-screen bg-gradient-subtle">
+      <AdminHeader />
+      <main className="max-w-7xl mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+        <div className="grid grid-cols-2 gap-4">
+          <StatsCard title="Total Customers" value={stats.totalCustomers.toString()} />
+          <StatsCard title="Total Documents" value={stats.totalDocuments.toString()} />
+        </div>
+      </main>
     </div>
   );
-}
+};
+
+export default AdminDashboard;
