@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          aadhaar_number: string
+          aadhaar_photo_url: string | null
+          account_number: string
+          created_at: string
+          date_registered: string
+          debit_card_number: string | null
+          debit_card_photo_url: string | null
+          id: string
+          ifsc_code: string
+          mobile: string
+          name: string
+          pan_number: string
+          pan_photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          aadhaar_number: string
+          aadhaar_photo_url?: string | null
+          account_number: string
+          created_at?: string
+          date_registered?: string
+          debit_card_number?: string | null
+          debit_card_photo_url?: string | null
+          id?: string
+          ifsc_code: string
+          mobile: string
+          name: string
+          pan_number: string
+          pan_photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aadhaar_number?: string
+          aadhaar_photo_url?: string | null
+          account_number?: string
+          created_at?: string
+          date_registered?: string
+          debit_card_number?: string | null
+          debit_card_photo_url?: string | null
+          id?: string
+          ifsc_code?: string
+          mobile?: string
+          name?: string
+          pan_number?: string
+          pan_photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
