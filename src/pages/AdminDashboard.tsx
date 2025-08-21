@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/AdminHeader";
 import StatsCard from "@/components/StatsCard";
+import CustomerForm from "@/components/CustomerForm";
+import RecordsTable from "@/components/RecordsTable";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
