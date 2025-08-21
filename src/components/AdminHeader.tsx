@@ -1,24 +1,20 @@
 import { Shield, LogOut, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {
-  const navigate = useNavigate();
-
   const handleLogout = () => {
     const role = localStorage.getItem("role");
 
-    // clear auth storage
-    localStorage.removeItem("role");
-    localStorage.removeItem("staffId");
+    // clear everything
+    localStorage.clear();
 
-    // role-specific redirect
+    // force redirect to correct login page
     if (role === "admin") {
-      navigate("/admin/login");
+      window.location.href = "/admin/login";
     } else if (role === "staff") {
-      navigate("/staff/login");
+      window.location.href = "/staff/login";
     } else {
-      navigate("/");
+      window.location.href = "/";
     }
   };
 
@@ -36,7 +32,9 @@ const AdminHeader = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-primary-foreground/80">
               <Users className="h-4 w-4" />
-              <span className="text-sm">Admin Portal</span>
+              <span className="text-sm">
+                {localStorage.getItem("role") === "staff" ? "Staff Portal" : "Admin Portal"}
+              </span>
             </div>
 
             <Button
