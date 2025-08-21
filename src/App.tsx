@@ -1,12 +1,9 @@
 // src/App.tsx
 import React from "react";
+import Login from "./pages/Login";
 
 function App() {
-  return (
-    <div>
-      <h1>Hello Vite + React + Vercel!</h1>
-    </div>
-  );
+  return <Login />;
 }
 
 export default App;
