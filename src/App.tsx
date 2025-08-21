@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from "react";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 
 function App() {
   return <Login />;
