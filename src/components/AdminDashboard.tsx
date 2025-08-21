@@ -1,59 +1,44 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import AdminHeader from "@/components/AdminHeader";
+import RecordsTable from "@/components/RecordsTable";
+import CustomerForm from "@/components/CustomerForm";
 
 const AdminDashboard = () => {
-  const [entries, setEntries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchEntries = async () => {
-      const { data, error } = await supabase
-        .from("profiles") // change this table name if your entries are in another table
-        .select("id, role, created_at, data"); // adjust columns as per your DB
-
-      if (error) {
-        console.error("Error fetching entries:", error);
-      } else {
-        setEntries(data || []);
-      }
-      setLoading(false);
-    };
-
-    fetchEntries();
-  }, []);
+  const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">All Entries (Admin)</h1>
+    <div className="min-h-screen bg-gray-50">
+      <AdminHeader />
+      <main className="p-6 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h3 className="text-sm text-gray-500">Total Customers</h3>
+            <p className="text-2xl font-bold">120</p>
+          </div>
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h3 className="text-sm text-gray-500">Total Documents</h3>
+            <p className="text-2xl font-bold">45</p>
+          </div>
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h3 className="text-sm text-gray-500">Verified</h3>
+            <p className="text-2xl font-bold">90</p>
+          </div>
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h3 className="text-sm text-gray-500">This Month</h3>
+            <p className="text-2xl font-bold">30</p>
+          </div>
+        </div>
 
-      {loading ? (
-        <p>Loading entries...</p>
-      ) : entries.length === 0 ? (
-        <p>No entries found.</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border p-2">User ID</th>
-              <th className="border p-2">Role</th>
-              <th className="border p-2">Data</th>
-              <th className="border p-2">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((entry) => (
-              <tr key={entry.id}>
-                <td className="border p-2">{entry.id}</td>
-                <td className="border p-2">{entry.role}</td>
-                <td className="border p-2">{entry.data ?? "-"}</td>
-                <td className="border p-2">
-                  {new Date(entry.created_at).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {/* Actions */}
+        <Button onClick={() => setShowForm(true)} className="bg-gradient-primary">
+          Add New Customer
+        </Button>
+
+        {showForm && <CustomerForm onClose={() => setShowForm(false)} />}
+        <RecordsTable />
+      </main>
     </div>
   );
 };
