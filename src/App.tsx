@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
@@ -20,15 +21,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/staff/login" element={<StaffLogin />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>}/>
+
+          {/* Protected routes */}
           <Route
             path="/admin/dashboard"
             element={
               <ProtectedRoute role="admin">
-                  <AdminDashboard />
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />
@@ -42,8 +45,7 @@ const App = () => (
             }
           />
 
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
