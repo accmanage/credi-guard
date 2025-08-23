@@ -9,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
 import StaffLogin from "@/pages/StaffLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminCustomers from "@/pages/AdminCustomers";
+import StaffManagement from "@/pages/StaffManagement";
 import StaffDashboard from "@/pages/StaffDashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -32,6 +34,24 @@ const App = () => (
             element={
               <ProtectedRoute role="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/customers"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminCustomers />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/staff"
+            element={
+              <ProtectedRoute role="admin">
+                <StaffManagement />
               </ProtectedRoute>
             }
           />
