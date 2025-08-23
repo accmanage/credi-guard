@@ -17,7 +17,8 @@ export default function StaffDashboard() {
     }
 
     const fetchRecords = async () => {
-      const { data, error } = await supabase
+      // Type assertion needed until types are regenerated
+      const { data, error } = await (supabase as any)
         .from("staff_data")
         .select("*")
         .eq("staff_id", staffId);
@@ -29,16 +30,16 @@ export default function StaffDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminHeader title="Staff Dashboard" />
+    <div className="min-h-screen bg-gradient-subtle">
+      <AdminHeader />
 
       <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard icon={<FileText />} title="My Records" value={records.length} />
-        <StatsCard icon={<TrendingUp />} title="Performance" value="+5%" />
+        <StatsCard icon={FileText} title="My Records" value={records.length.toString()} />
+        <StatsCard icon={TrendingUp} title="Performance" value="+5%" />
       </div>
 
       <div className="p-6">
-        <RecordsTable records={records} loading={loading} />
+        <RecordsTable />
       </div>
     </div>
   );

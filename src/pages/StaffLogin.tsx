@@ -8,7 +8,8 @@ export default function StaffLogin() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const { data, error } = await supabase
+    // Type assertion needed until types are regenerated
+    const { data, error } = await (supabase as any)
       .from("users")
       .select("*")
       .eq("email", email)

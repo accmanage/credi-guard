@@ -65,6 +65,98 @@ export type Database = {
         }
         Relationships: []
       }
+      entries: {
+        Row: {
+          created_at: string | null
+          data: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      staff_data: {
+        Row: {
+          created_at: string | null
+          customer_name: string | null
+          id: string
+          record: Json | null
+          staff_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_name?: string | null
+          id?: string
+          record?: Json | null
+          staff_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_name?: string | null
+          id?: string
+          record?: Json | null
+          staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_data_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          email: string
+          id: string
+          password: string
+          role: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          password: string
+          role?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          password?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
