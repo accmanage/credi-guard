@@ -9,9 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CustomerFormProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const CustomerForm = ({ onClose }: CustomerFormProps) => {
+const CustomerForm = ({ onClose, onSuccess }: CustomerFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
     accountNumber: "",
@@ -81,6 +82,7 @@ const CustomerForm = ({ onClose }: CustomerFormProps) => {
         title: "Customer Record Saved",
         description: "The customer record has been added successfully.",
       });
+      onSuccess?.();
       onClose();
     } catch (error) {
       console.error('Error saving customer:', error);

@@ -11,22 +11,20 @@ interface StatsCardProps {
 
 const StatsCard = ({ title, value, icon: Icon, trend, trendUp }: StatsCardProps) => {
   return (
-    <Card className="bg-gradient-card shadow-soft hover:shadow-medium transition-all duration-200 border-border">
+    <Card className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <Icon className="h-5 w-5 text-gray-400" />
+              <p className="text-sm font-medium text-gray-600">{title}</p>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{value}</p>
             {trend && (
-              <p className={`text-sm mt-1 ${
-                trendUp ? 'text-success' : 'text-destructive'
-              }`}>
+              <p className="text-sm text-blue-600 mt-1">
                 {trend}
               </p>
             )}
-          </div>
-          <div className="bg-accent rounded-full p-3">
-            <Icon className="h-6 w-6 text-accent-foreground" />
           </div>
         </div>
       </CardContent>

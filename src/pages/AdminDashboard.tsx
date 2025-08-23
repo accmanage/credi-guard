@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { Users, FileText } from "lucide-react";
+import { Users, CreditCard, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminHeader from "@/components/AdminHeader";
+import NavigationTabs from "@/components/NavigationTabs";
+import DashboardHeader from "@/components/DashboardHeader";
 import StatsCard from "@/components/StatsCard";
+import RecentCustomers from "@/components/RecentCustomers";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalCustomers: 0,
-    totalDocuments: 0,
+    totalAccounts: 0,
+    debitCards: 0,
   });
 
   useEffect(() => {
@@ -21,33 +25,55 @@ const AdminDashboard = () => {
         .from("customers")
         .select("*", { count: "exact", head: true });
 
-      // Documents count
-      const { data: customersWithDocs } = await supabase
+      // Count debit cards (customers with debit_card_number)
+      const { data: customersWithDebitCards } = await supabase
         .from("customers")
-        .select("pan_photo_url, aadhaar_photo_url, debit_card_photo_url");
+        .select("debit_card_number")
+        .not("debit_card_number", "is", null);
 
-      const totalDocuments = customersWithDocs?.reduce((sum, c) => {
-        return sum +
-          (c.pan_photo_url ? 1 : 0) +
-          (c.aadhaar_photo_url ? 1 : 0) +
-          (c.debit_card_photo_url ? 1 : 0);
-      }, 0) || 0;
+      const debitCards = customersWithDebitCards?.length || 0;
 
-      setStats({ totalCustomers, totalDocuments });
+      setStats({ 
+        totalCustomers: totalCustomers || 0, 
+        totalAccounts: totalCustomers || 0, // Same as customers for now
+        debitCards 
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gray-50">
       <AdminHeader />
-      <main className="max-w-7xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <StatsCard title="Total Customers" value={stats.totalCustomers.toString()} icon={Users} />
-          <StatsCard title="Total Documents" value={stats.totalDocuments.toString()} icon={FileText} />
+      <NavigationTabs />
+      <DashboardHeader />
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatsCard 
+            title="Total Customers" 
+            value={stats.totalCustomers.toString()} 
+            icon={Users}
+            trend="Active bank customers"
+          />
+          <StatsCard 
+            title="Total Accounts" 
+            value={stats.totalAccounts.toString()} 
+            icon={Building2}
+            trend="Active bank accounts"
+          />
+          <StatsCard 
+            title="Debit Cards" 
+            value={stats.debitCards.toString()} 
+            icon={CreditCard}
+            trend="Active debit cards"
+          />
         </div>
+
+        {/* Recent Customers */}
+        <RecentCustomers />
       </main>
     </div>
   );
